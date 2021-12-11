@@ -446,7 +446,11 @@ function Stake() {
                       </AccordionDetails>
                     </Accordion>
                     <Divider color="secondary" />
-                    <StakeRow title={t`Next Reward Amount`} balance={`${nextRewardValue} sLION`} {...{ isAppLoading }} />
+                    <StakeRow
+                      title={t`Next Reward Amount`}
+                      balance={`${nextRewardValue} sLION`}
+                      {...{ isAppLoading }}
+                    />
                     <StakeRow
                       title={t`Next Reward Yield`}
                       balance={`${stakingRebasePercentage}%`}

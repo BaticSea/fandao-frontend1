@@ -2,7 +2,14 @@ import { memo } from "react";
 import "./treasury-dashboard.scss";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Paper, Grid, Box, Zoom, Container, useMediaQuery } from "@material-ui/core";
-import { MarketCap, LIONPrice, WSLIONPrice, CircSupply, BackingPerLION, CurrentIndex } from "./components/Metric/Metric";
+import {
+  MarketCap,
+  LIONPrice,
+  WSLIONPrice,
+  CircSupply,
+  BackingPerLION,
+  CurrentIndex,
+} from "./components/Metric/Metric";
 
 import {
   TotalValueDepositedGraph,
