@@ -1,9 +1,9 @@
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { addresses } from "../constants";
 import { abi as ierc20Abi } from "../abi/IERC20.json";
-import { abi as sOHMv2 } from "../abi/sOhmv2.json";
+import { abi as sLIONv2 } from "../abi/sLionv2.json";
 import { abi as fuseProxy } from "../abi/FuseProxy.json";
-import { abi as wsOHM } from "../abi/wsOHM.json";
+import { abi as wsLION } from "../abi/wsLION.json";
 import { abi as fiatDAO } from "../abi/FiatDAOContract.json";
 
 import { setAll, handleContractError } from "../helpers";
@@ -11,18 +11,18 @@ import { setAll, handleContractError } from "../helpers";
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "src/store";
 import { IBaseAddressAsyncThunk, ICalcUserBondDetailsAsyncThunk } from "./interfaces";
-import { FiatDAOContract, FuseProxy, IERC20, IERC20__factory, SOhmv2, SOhmv2__factory, WsOHM } from "src/typechain";
-import { GOHM__factory } from "src/typechain/factories/GOHM__factory";
+import { FiatDAOContract, FuseProxy, IERC20, IERC20__factory, SLionv2, SLionv2__factory, WsLION } from "src/typechain";
+import { GLION__factory } from "src/typechain/factories/GLION__factory";
 
 interface IUserBalances {
   balances: {
-    gohm: string;
-    ohm: string;
-    sohm: string;
-    fsohm: string;
-    wsohm: string;
-    fiatDaowsohm: string;
-    wsohmAsSohm: string;
+    glion: string;
+    lion: string;
+    slion: string;
+    fslion: string;
+    wslion: string;
+    fiatDaowslion: string;
+    wslionAsSlion: string;
     pool: string;
   };
 }
@@ -30,45 +30,49 @@ interface IUserBalances {
 export const getBalances = createAsyncThunk(
   "account/getBalances",
   async ({ address, networkID, provider }: IBaseAddressAsyncThunk) => {
-    let gOhmBalance = BigNumber.from("0");
-    let ohmBalance = BigNumber.from("0");
-    let sohmBalance = BigNumber.from("0");
-    let wsohmBalance = BigNumber.from("0");
-    let wsohmAsSohm = BigNumber.from("0");
+    let gLionBalance = BigNumber.from("0");
+    let lionBalance = BigNumber.from("0");
+    let slionBalance = BigNumber.from("0");
+    let wslionBalance = BigNumber.from("0");
+    let wslionAsSlion = BigNumber.from("0");
     let poolBalance = BigNumber.from("0");
-    let fsohmBalance = BigNumber.from(0);
-    let fiatDaowsohmBalance = BigNumber.from("0");
+    let fslionBalance = BigNumber.from(0);
+    let fiatDaowslionBalance = BigNumber.from("0");
     try {
-      const gOhmContract = GOHM__factory.connect(addresses[networkID].GOHM_ADDRESS, provider);
-      gOhmBalance = await gOhmContract.balanceOf(address);
+      const gLionContract = GLION__factory.connect(addresses[networkID].GLION_ADDRESS, provider);
+      gLionBalance = await gLionContract.balanceOf(address);
     } catch (e) {
       handleContractError(e);
     }
     try {
-      const wsohmContract = new ethers.Contract(addresses[networkID].WSOHM_ADDRESS as string, wsOHM, provider) as WsOHM;
-      wsohmBalance = await wsohmContract.balanceOf(address);
-      // NOTE (appleseed): wsohmAsSohm is wsOHM given as a quantity of sOHM
-      wsohmAsSohm = await wsohmContract.wOHMTosOHM(wsohmBalance);
+      const wslionContract = new ethers.Contract(
+        addresses[networkID].WSLION_ADDRESS as string,
+        wsLION,
+        provider,
+      ) as WsLION;
+      wslionBalance = await wslionContract.balanceOf(address);
+      // NOTE (appleseed): wslionAsSlion is wsLION given as a quantity of sLION
+      wslionAsSlion = await wslionContract.wLIONTosLION(wslionBalance);
     } catch (e) {
       handleContractError(e);
     }
     try {
-      const ohmContract = new ethers.Contract(
-        addresses[networkID].OHM_ADDRESS as string,
+      const lionContract = new ethers.Contract(
+        addresses[networkID].LION_ADDRESS as string,
         ierc20Abi,
         provider,
       ) as IERC20;
-      ohmBalance = await ohmContract.balanceOf(address);
+      lionBalance = await lionContract.balanceOf(address);
     } catch (e) {
       handleContractError(e);
     }
     try {
-      const sohmContract = new ethers.Contract(
-        addresses[networkID].SOHM_ADDRESS as string,
+      const slionContract = new ethers.Contract(
+        addresses[networkID].SLION_ADDRESS as string,
         ierc20Abi,
         provider,
       ) as IERC20;
-      sohmBalance = await sohmContract.balanceOf(address);
+      slionBalance = await slionContract.balanceOf(address);
     } catch (e) {
       handleContractError(e);
     }
@@ -83,29 +87,29 @@ export const getBalances = createAsyncThunk(
       handleContractError(e);
     }
     try {
-      for (const fuseAddressKey of ["FUSE_6_SOHM", "FUSE_18_SOHM", "FUSE_36_SOHM"]) {
+      for (const fuseAddressKey of ["FUSE_6_SLION", "FUSE_18_SLION", "FUSE_36_SLION"]) {
         if (addresses[networkID][fuseAddressKey]) {
-          const fsohmContract = new ethers.Contract(
+          const fslionContract = new ethers.Contract(
             addresses[networkID][fuseAddressKey] as string,
             fuseProxy,
             provider.getSigner(),
           ) as FuseProxy;
-          // fsohmContract.signer;
-          const balanceOfUnderlying = await fsohmContract.callStatic.balanceOfUnderlying(address);
-          fsohmBalance = balanceOfUnderlying.add(fsohmBalance);
+          // fslionContract.signer;
+          const balanceOfUnderlying = await fslionContract.callStatic.balanceOfUnderlying(address);
+          fslionBalance = balanceOfUnderlying.add(fslionBalance);
         }
       }
     } catch (e) {
       handleContractError(e);
     }
     try {
-      if (addresses[networkID].FIATDAO_WSOHM_ADDRESS) {
+      if (addresses[networkID].FIATDAO_WSLION_ADDRESS) {
         const fiatDaoContract = new ethers.Contract(
-          addresses[networkID].FIATDAO_WSOHM_ADDRESS as string,
+          addresses[networkID].FIATDAO_WSLION_ADDRESS as string,
           fiatDAO,
           provider,
         ) as FiatDAOContract;
-        fiatDaowsohmBalance = await fiatDaoContract.balanceOf(address, addresses[networkID].WSOHM_ADDRESS as string);
+        fiatDaowslionBalance = await fiatDaoContract.balanceOf(address, addresses[networkID].WSLION_ADDRESS as string);
       }
     } catch (e) {
       handleContractError(e);
@@ -113,13 +117,13 @@ export const getBalances = createAsyncThunk(
 
     return {
       balances: {
-        gohm: ethers.utils.formatEther(gOhmBalance),
-        ohm: ethers.utils.formatUnits(ohmBalance, "gwei"),
-        sohm: ethers.utils.formatUnits(sohmBalance, "gwei"),
-        fsohm: ethers.utils.formatUnits(fsohmBalance, "gwei"),
-        wsohm: ethers.utils.formatEther(wsohmBalance),
-        fiatDaowsohm: ethers.utils.formatEther(fiatDaowsohmBalance),
-        wsohmAsSohm: ethers.utils.formatUnits(wsohmAsSohm, "gwei"),
+        glion: ethers.utils.formatEther(gLionBalance),
+        lion: ethers.utils.formatUnits(lionBalance, "gwei"),
+        slion: ethers.utils.formatUnits(slionBalance, "gwei"),
+        fslion: ethers.utils.formatUnits(fslionBalance, "gwei"),
+        wslion: ethers.utils.formatEther(wslionBalance),
+        fiatDaowslion: ethers.utils.formatEther(fiatDaowslionBalance),
+        wslionAsSlion: ethers.utils.formatUnits(wslionAsSlion, "gwei"),
         pool: ethers.utils.formatUnits(poolBalance, "gwei"),
       },
     };
@@ -128,55 +132,55 @@ export const getBalances = createAsyncThunk(
 
 interface IUserAccountDetails {
   staking: {
-    ohmStake: number;
-    ohmUnstake: number;
+    lionStake: number;
+    lionUnstake: number;
   };
   wrapping: {
-    sohmWrap: number;
-    wsohmUnwrap: number;
-    gOhmUnwrap: number;
+    slionWrap: number;
+    wslionUnwrap: number;
+    gLionUnwrap: number;
   };
 }
 
 export const getMigrationAllowances = createAsyncThunk(
   "account/getMigrationAllowances",
   async ({ networkID, provider, address }: IBaseAddressAsyncThunk) => {
-    let ohmAllowance = BigNumber.from(0);
-    let sOhmAllowance = BigNumber.from(0);
-    let wsOhmAllowance = BigNumber.from(0);
-    let gOhmAllowance = BigNumber.from(0);
+    let lionAllowance = BigNumber.from(0);
+    let sLionAllowance = BigNumber.from(0);
+    let wsLionAllowance = BigNumber.from(0);
+    let gLionAllowance = BigNumber.from(0);
 
-    if (addresses[networkID].OHM_ADDRESS) {
+    if (addresses[networkID].LION_ADDRESS) {
       try {
-        const ohmContract = IERC20__factory.connect(addresses[networkID].OHM_ADDRESS, provider);
-        ohmAllowance = await ohmContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
+        const lionContract = IERC20__factory.connect(addresses[networkID].LION_ADDRESS, provider);
+        lionAllowance = await lionContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
       } catch (e) {
         handleContractError(e);
       }
     }
 
-    if (addresses[networkID].SOHM_ADDRESS) {
+    if (addresses[networkID].SLION_ADDRESS) {
       try {
-        const sOhmContract = IERC20__factory.connect(addresses[networkID].SOHM_ADDRESS, provider);
-        sOhmAllowance = await sOhmContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
+        const sLionContract = IERC20__factory.connect(addresses[networkID].SLION_ADDRESS, provider);
+        sLionAllowance = await sLionContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
       } catch (e) {
         handleContractError(e);
       }
     }
 
-    if (addresses[networkID].WSOHM_ADDRESS) {
+    if (addresses[networkID].WSLION_ADDRESS) {
       try {
-        const wsOhmContract = IERC20__factory.connect(addresses[networkID].WSOHM_ADDRESS, provider);
-        wsOhmAllowance = await wsOhmContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
+        const wsLionContract = IERC20__factory.connect(addresses[networkID].WSLION_ADDRESS, provider);
+        wsLionAllowance = await wsLionContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
       } catch (e) {
         handleContractError(e);
       }
     }
 
-    if (addresses[networkID].GOHM_ADDRESS) {
+    if (addresses[networkID].GLION_ADDRESS) {
       try {
-        const gOhmContract = IERC20__factory.connect(addresses[networkID].GOHM_ADDRESS, provider);
-        gOhmAllowance = await gOhmContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
+        const gLionContract = IERC20__factory.connect(addresses[networkID].GLION_ADDRESS, provider);
+        gLionAllowance = await gLionContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
       } catch (e) {
         handleContractError(e);
       }
@@ -184,10 +188,10 @@ export const getMigrationAllowances = createAsyncThunk(
 
     return {
       migration: {
-        ohm: +ohmAllowance,
-        sohm: +sOhmAllowance,
-        wsohm: +wsOhmAllowance,
-        gohm: +gOhmAllowance,
+        lion: +lionAllowance,
+        slion: +sLionAllowance,
+        wslion: +wsLionAllowance,
+        glion: +gLionAllowance,
       },
       isMigrationComplete: false,
     };
@@ -201,26 +205,34 @@ export const loadAccountDetails = createAsyncThunk(
     let unstakeAllowance = BigNumber.from("0");
     let wrapAllowance = BigNumber.from("0");
     let unwrapAllowance = BigNumber.from("0");
-    let gOhmUnwrapAllowance = BigNumber.from("0");
+    let gLionUnwrapAllowance = BigNumber.from("0");
     let poolAllowance = BigNumber.from("0");
     try {
-      const gOhmContract = GOHM__factory.connect(addresses[networkID].GOHM_ADDRESS, provider);
-      gOhmUnwrapAllowance = await gOhmContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
+      const gLionContract = GLION__factory.connect(addresses[networkID].GLION_ADDRESS, provider);
+      gLionUnwrapAllowance = await gLionContract.allowance(address, addresses[networkID].MIGRATOR_ADDRESS);
 
-      const ohmContract = new ethers.Contract(
-        addresses[networkID].OHM_ADDRESS as string,
+      const lionContract = new ethers.Contract(
+        addresses[networkID].LION_ADDRESS as string,
         ierc20Abi,
         provider,
       ) as IERC20;
-      stakeAllowance = await ohmContract.allowance(address, addresses[networkID].STAKING_HELPER_ADDRESS);
+      stakeAllowance = await lionContract.allowance(address, addresses[networkID].STAKING_HELPER_ADDRESS);
 
-      const sohmContract = new ethers.Contract(addresses[networkID].SOHM_ADDRESS as string, sOHMv2, provider) as SOhmv2;
-      unstakeAllowance = await sohmContract.allowance(address, addresses[networkID].STAKING_ADDRESS);
-      poolAllowance = await sohmContract.allowance(address, addresses[networkID].PT_PRIZE_POOL_ADDRESS);
-      wrapAllowance = await sohmContract.allowance(address, addresses[networkID].WSOHM_ADDRESS);
+      const slionContract = new ethers.Contract(
+        addresses[networkID].SLION_ADDRESS as string,
+        sLIONv2,
+        provider,
+      ) as SLionv2;
+      unstakeAllowance = await slionContract.allowance(address, addresses[networkID].STAKING_ADDRESS);
+      poolAllowance = await slionContract.allowance(address, addresses[networkID].PT_PRIZE_POOL_ADDRESS);
+      wrapAllowance = await slionContract.allowance(address, addresses[networkID].WSLION_ADDRESS);
 
-      const wsohmContract = new ethers.Contract(addresses[networkID].WSOHM_ADDRESS as string, wsOHM, provider) as WsOHM;
-      unwrapAllowance = await wsohmContract.allowance(address, addresses[networkID].WSOHM_ADDRESS);
+      const wslionContract = new ethers.Contract(
+        addresses[networkID].WSLION_ADDRESS as string,
+        wsLION,
+        provider,
+      ) as WsLION;
+      unwrapAllowance = await wslionContract.allowance(address, addresses[networkID].WSLION_ADDRESS);
     } catch (e) {
       console.warn("failed contract calls in slice", e);
     }
@@ -228,13 +240,13 @@ export const loadAccountDetails = createAsyncThunk(
 
     return {
       staking: {
-        ohmStake: +stakeAllowance,
-        ohmUnstake: +unstakeAllowance,
+        lionStake: +stakeAllowance,
+        lionUnstake: +unstakeAllowance,
       },
       wrapping: {
-        ohmWrap: Number(ethers.utils.formatUnits(wrapAllowance, "gwei")),
-        ohmUnwrap: Number(ethers.utils.formatUnits(unwrapAllowance, "gwei")),
-        gOhmUnwrap: Number(ethers.utils.formatUnits(gOhmUnwrapAllowance, "ether")),
+        lionWrap: Number(ethers.utils.formatUnits(wrapAllowance, "gwei")),
+        lionUnwrap: Number(ethers.utils.formatUnits(unwrapAllowance, "gwei")),
+        gLionUnwrap: Number(ethers.utils.formatUnits(gLionUnwrapAllowance, "ether")),
       },
     };
   },
@@ -300,30 +312,30 @@ export const calculateUserBondDetails = createAsyncThunk(
 interface IAccountSlice extends IUserAccountDetails, IUserBalances {
   bonds: { [key: string]: IUserBondDetails };
   balances: {
-    gohm: string;
-    ohm: string;
-    sohm: string;
+    glion: string;
+    lion: string;
+    slion: string;
     dai: string;
-    oldsohm: string;
-    fsohm: string;
-    wsohm: string;
-    fiatDaowsohm: string;
-    wsohmAsSohm: string;
+    oldslion: string;
+    fslion: string;
+    wslion: string;
+    fiatDaowslion: string;
+    wslionAsSlion: string;
     pool: string;
   };
   loading: boolean;
   staking: {
-    ohmStake: number;
-    ohmUnstake: number;
+    lionStake: number;
+    lionUnstake: number;
   };
   migration: {
-    ohm: number;
-    sohm: number;
-    wsohm: number;
-    gohm: number;
+    lion: number;
+    slion: number;
+    wslion: number;
+    glion: number;
   };
   pooling: {
-    sohmPool: number;
+    slionPool: number;
   };
 }
 
@@ -331,21 +343,21 @@ const initialState: IAccountSlice = {
   loading: false,
   bonds: {},
   balances: {
-    gohm: "",
-    ohm: "",
-    sohm: "",
+    glion: "",
+    lion: "",
+    slion: "",
     dai: "",
-    oldsohm: "",
-    fsohm: "",
-    wsohm: "",
-    fiatDaowsohm: "",
+    oldslion: "",
+    fslion: "",
+    wslion: "",
+    fiatDaowslion: "",
     pool: "",
-    wsohmAsSohm: "",
+    wslionAsSlion: "",
   },
-  staking: { ohmStake: 0, ohmUnstake: 0 },
-  wrapping: { sohmWrap: 0, wsohmUnwrap: 0, gOhmUnwrap: 0 },
-  pooling: { sohmPool: 0 },
-  migration: { ohm: 0, sohm: 0, wsohm: 0, gohm: 0 },
+  staking: { lionStake: 0, lionUnstake: 0 },
+  wrapping: { slionWrap: 0, wslionUnwrap: 0, gLionUnwrap: 0 },
+  pooling: { slionPool: 0 },
+  migration: { lion: 0, slion: 0, wslion: 0, glion: 0 },
 };
 
 const accountSlice = createSlice({

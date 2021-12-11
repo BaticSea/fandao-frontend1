@@ -100,18 +100,18 @@ export const ProtocolOwnedLiquidityGraph = () => {
       dataFormat="percent"
       itemNames={tooltipItems.pol}
       itemType={itemType.percentage}
-      dataKey={["treasuryOhmDaiPOL"]}
+      dataKey={["treasuryLionDaiPOL"]}
       bulletpointColors={bulletpoints.pol}
       infoTooltipMessage={tooltipInfoMessages.pol}
-      headerText="Protocol Owned Liquidity OHM-DAI"
+      headerText="Protocol Owned Liquidity LION-DAI"
       expandedGraphStrokeColor={theme.palette.graphStrokeColor}
-      headerSubText={`${data && trim(data[0].treasuryOhmDaiPOL, 2)}% `}
+      headerSubText={`${data && trim(data[0].treasuryLionDaiPOL, 2)}% `}
       stopColor={[["rgba(128, 204, 131, 1)", "rgba(128, 204, 131, 0)"]]}
     />
   );
 };
 
-export const OHMStakedGraph = () => {
+export const LIONStakedGraph = () => {
   const theme = useTheme();
   const { data } = useTreasuryMetrics({ refetchOnMount: false });
 
@@ -119,7 +119,7 @@ export const OHMStakedGraph = () => {
     data &&
     data
       .map(metric => ({
-        staked: (metric.sOhmCirculatingSupply / metric.ohmCirculatingSupply) * 100,
+        staked: (metric.sLionCirculatingSupply / metric.lionCirculatingSupply) * 100,
         timestamp: metric.timestamp,
       }))
       .filter(metric => metric.staked < 100);
@@ -131,7 +131,7 @@ export const OHMStakedGraph = () => {
       data={staked}
       dataKey={["staked"]}
       dataFormat="percent"
-      headerText="OHM Staked"
+      headerText="LION Staked"
       stopColor={[["#55EBC7", "#47ACEB"]]}
       bulletpointColors={bulletpoints.staked}
       infoTooltipMessage={tooltipInfoMessages.staked}

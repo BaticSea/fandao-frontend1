@@ -1,14 +1,14 @@
 import { ethers, BigNumber } from "ethers";
 import { addresses } from "../constants";
 import { abi as ierc20ABI } from "../abi/IERC20.json";
-import { abi as wsOHM } from "../abi/wsOHM.json";
+import { abi as wsLION } from "../abi/wsLION.json";
 import { clearPendingTxn, fetchPendingTxns, getWrappingTypeText } from "./PendingTxnsSlice";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchAccountSuccess, getBalances } from "./AccountSlice";
 import { error, info } from "../slices/MessagesSlice";
 import { IActionValueAsyncThunk, IChangeApprovalAsyncThunk, IJsonRPCError } from "./interfaces";
 import { segmentUA } from "../helpers/userAnalyticHelpers";
-import { IERC20, WsOHM } from "src/typechain";
+import { IERC20, WsLION } from "src/typechain";
 
 interface IUAData {
   address: string;
@@ -27,32 +27,36 @@ export const changeApproval = createAsyncThunk(
     }
 
     const signer = provider.getSigner();
-    const sohmContract = new ethers.Contract(addresses[networkID].SOHM_ADDRESS as string, ierc20ABI, signer) as IERC20;
-    const wsohmContract = new ethers.Contract(
-      addresses[networkID].WSOHM_ADDRESS as string,
+    const slionContract = new ethers.Contract(
+      addresses[networkID].SLION_ADDRESS as string,
+      ierc20ABI,
+      signer,
+    ) as IERC20;
+    const wslionContract = new ethers.Contract(
+      addresses[networkID].WSLION_ADDRESS as string,
       ierc20ABI,
       signer,
     ) as IERC20;
     let approveTx;
-    let wrapAllowance = await sohmContract.allowance(address, addresses[networkID].WSOHM_ADDRESS);
-    let unwrapAllowance = await wsohmContract.allowance(address, addresses[networkID].WSOHM_ADDRESS);
+    let wrapAllowance = await slionContract.allowance(address, addresses[networkID].WSLION_ADDRESS);
+    let unwrapAllowance = await wslionContract.allowance(address, addresses[networkID].WSLION_ADDRESS);
 
     try {
-      if (token === "sohm") {
+      if (token === "slion") {
         // won't run if wrapAllowance > 0
-        approveTx = await sohmContract.approve(
-          addresses[networkID].WSOHM_ADDRESS,
+        approveTx = await slionContract.approve(
+          addresses[networkID].WSLION_ADDRESS,
           ethers.utils.parseUnits("1000000000", "gwei"),
         );
-      } else if (token === "wsohm") {
-        approveTx = await wsohmContract.approve(
-          addresses[networkID].WSOHM_ADDRESS,
+      } else if (token === "wslion") {
+        approveTx = await wslionContract.approve(
+          addresses[networkID].WSLION_ADDRESS,
           ethers.utils.parseUnits("1000000000", "ether"),
         );
       }
 
-      const text = "Approve " + (token === "sohm" ? "Wrapping" : "Unwrapping");
-      const pendingTxnType = token === "sohm" ? "approve_wrapping" : "approve_unwrapping";
+      const text = "Approve " + (token === "slion" ? "Wrapping" : "Unwrapping");
+      const pendingTxnType = token === "slion" ? "approve_wrapping" : "approve_unwrapping";
       if (approveTx) {
         dispatch(fetchPendingTxns({ txnHash: approveTx.hash, text, type: pendingTxnType }));
         await approveTx.wait();
@@ -68,14 +72,14 @@ export const changeApproval = createAsyncThunk(
     }
 
     // go get fresh allowances
-    wrapAllowance = await sohmContract.allowance(address, addresses[networkID].WSOHM_ADDRESS);
-    unwrapAllowance = await wsohmContract.allowance(address, addresses[networkID].WSOHM_ADDRESS);
+    wrapAllowance = await slionContract.allowance(address, addresses[networkID].WSLION_ADDRESS);
+    unwrapAllowance = await wslionContract.allowance(address, addresses[networkID].WSLION_ADDRESS);
 
     return dispatch(
       fetchAccountSuccess({
         wrapping: {
-          ohmWrap: +wrapAllowance,
-          ohmUnwrap: +unwrapAllowance,
+          lionWrap: +wrapAllowance,
+          lionUnwrap: +unwrapAllowance,
         },
       }),
     );
@@ -91,7 +95,7 @@ export const changeWrap = createAsyncThunk(
     }
 
     const signer = provider.getSigner();
-    const wsohmContract = new ethers.Contract(addresses[networkID].WSOHM_ADDRESS as string, wsOHM, signer) as WsOHM;
+    const wslionContract = new ethers.Contract(addresses[networkID].WSLION_ADDRESS as string, wsLION, signer) as WsLION;
 
     let wrapTx;
     let uaData: IUAData = {
@@ -104,10 +108,10 @@ export const changeWrap = createAsyncThunk(
     try {
       if (action === "wrap") {
         uaData.type = "wrap";
-        wrapTx = await wsohmContract.wrap(ethers.utils.parseUnits(value, "gwei"));
+        wrapTx = await wslionContract.wrap(ethers.utils.parseUnits(value, "gwei"));
       } else {
         uaData.type = "unwrap";
-        wrapTx = await wsohmContract.unwrap(ethers.utils.parseUnits(value));
+        wrapTx = await wslionContract.unwrap(ethers.utils.parseUnits(value));
       }
       const pendingTxnType = action === "wrap" ? "wrapping" : "unwrapping";
       uaData.txHash = wrapTx.hash;

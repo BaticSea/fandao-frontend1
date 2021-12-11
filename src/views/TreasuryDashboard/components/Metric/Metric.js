@@ -21,12 +21,12 @@ export const MarketCap = () => {
   );
 };
 
-export const OHMPrice = () => {
+export const LIONPrice = () => {
   const marketPrice = useSelector(state => state.app.marketPrice);
   return (
     <Metric
       className="metric price"
-      label={t`OHM Price`}
+      label={t`LION Price`}
       metric={marketPrice && formatCurrency(marketPrice, 2)}
       isLoading={marketPrice ? false : true}
       {...sharedProps}
@@ -49,14 +49,14 @@ export const CircSupply = () => {
   );
 };
 
-export const BackingPerOHM = () => {
-  const backingPerOhm = useSelector(state => state.app.treasuryMarketValue / state.app.circSupply);
+export const BackingPerLION = () => {
+  const backingPerLion = useSelector(state => state.app.treasuryMarketValue / state.app.circSupply);
   return (
     <Metric
       className="metric bpo"
-      label={t`Backing per OHM`}
-      metric={!isNaN(backingPerOhm) && formatCurrency(backingPerOhm, 2)}
-      isLoading={backingPerOhm ? false : true}
+      label={t`Backing per LION`}
+      metric={!isNaN(backingPerLion) && formatCurrency(backingPerLion, 2)}
+      isLoading={backingPerLion ? false : true}
       {...sharedProps}
     />
   );
@@ -68,24 +68,24 @@ export const CurrentIndex = () => {
     <Metric
       className="metric index"
       label={t`Current Index`}
-      metric={currentIndex && trim(currentIndex, 2) + " sOHM"}
+      metric={currentIndex && trim(currentIndex, 2) + " sLION"}
       isLoading={currentIndex ? false : true}
       {...sharedProps}
-      tooltip="The current index tracks the amount of sOHM accumulated since the beginning of staking. Basically, how much sOHM one would have if they staked and held a single OHM from day 1."
+      tooltip="The current index tracks the amount of sLION accumulated since the beginning of staking. Basically, how much sLION one would have if they staked and held a single LION from day 1."
     />
   );
 };
 
-export const WSOHMPrice = () => {
-  const wsOhmPrice = useSelector(state => state.app.marketPrice * state.app.currentIndex);
+export const WSLIONPrice = () => {
+  const wsLionPrice = useSelector(state => state.app.marketPrice * state.app.currentIndex);
   return (
     <Metric
       className="metric wsoprice"
-      label={t`wsOHM Price`}
-      metric={wsOhmPrice && formatCurrency(wsOhmPrice, 2)}
-      isLoading={wsOhmPrice ? false : true}
+      label={t`wsLION Price`}
+      metric={wsLionPrice && formatCurrency(wsLionPrice, 2)}
+      isLoading={wsLionPrice ? false : true}
       {...sharedProps}
-      tooltip={`wsOHM = sOHM * index\n\nThe price of wsOHM is equal to the price of OHM multiplied by the current index`}
+      tooltip={`wsLION = sLION * index\n\nThe price of wsLION is equal to the price of LION multiplied by the current index`}
     />
   );
 };

@@ -12,7 +12,7 @@ import {
 import { fetchAccountSuccess, getBalances, getMigrationAllowances, loadAccountDetails } from "./AccountSlice";
 import { error, info } from "../slices/MessagesSlice";
 import { clearPendingTxn, fetchPendingTxns } from "./PendingTxnsSlice";
-import { OlympusTokenMigrator__factory } from "src/typechain";
+import { LionTokenMigrator__factory } from "src/typechain";
 import { NetworkID } from "src/lib/Bond";
 
 enum TokenType {
@@ -23,14 +23,14 @@ enum TokenType {
 
 const chooseContract = (token: string, networkID: NetworkID, signer: ethers.providers.JsonRpcSigner): IERC20 => {
   let address: string;
-  if (token === "ohm") {
-    address = addresses[networkID].OHM_ADDRESS;
-  } else if (token === "sohm") {
-    address = addresses[networkID].SOHM_ADDRESS;
-  } else if (token === "wsohm") {
-    address = addresses[networkID].WSOHM_ADDRESS;
-  } else if (token === "gohm") {
-    address = addresses[networkID].GOHM_ADDRESS;
+  if (token === "lion") {
+    address = addresses[networkID].LION_ADDRESS;
+  } else if (token === "slion") {
+    address = addresses[networkID].SLION_ADDRESS;
+  } else if (token === "wslion") {
+    address = addresses[networkID].WSLION_ADDRESS;
+  } else if (token === "glion") {
+    address = addresses[networkID].GLION_ADDRESS;
   } else {
     const message = `Invalid token type: ${token}`;
     console.error(message);
@@ -67,7 +67,7 @@ export const changeMigrationApproval = createAsyncThunk(
     try {
       approveTx = await tokenContract.approve(
         addresses[networkID].MIGRATOR_ADDRESS,
-        ethers.utils.parseUnits("1000000000", token === "wsohm" || token === "gohm" ? "ether" : "gwei").toString(),
+        ethers.utils.parseUnits("1000000000", token === "wslion" || token === "glion" ? "ether" : "gwei").toString(),
       );
 
       const text = `Approve ${displayName} Migration`;
@@ -103,18 +103,18 @@ export const bridgeBack = createAsyncThunk(
     }
 
     const signer = provider.getSigner();
-    const migrator = OlympusTokenMigrator__factory.connect(addresses[networkID].MIGRATOR_ADDRESS, signer);
+    const migrator = LionTokenMigrator__factory.connect(addresses[networkID].MIGRATOR_ADDRESS, signer);
 
     let unMigrateTx: ethers.ContractTransaction | undefined;
 
     try {
       unMigrateTx = await migrator.bridgeBack(ethers.utils.parseUnits(value, "ether"), TokenType.STAKED);
-      const text = `Bridge Back gOHM`;
+      const text = `Bridge Back gLION`;
       const pendingTxnType = `migrate`;
 
       dispatch(fetchPendingTxns({ txnHash: unMigrateTx.hash, text, type: pendingTxnType }));
       await unMigrateTx.wait();
-      dispatch(info("Successfully unwrapped gOHM!"));
+      dispatch(info("Successfully unwrapped gLION!"));
     } catch (e: unknown) {
       dispatch(error((e as IJsonRPCError).message));
     } finally {
@@ -137,13 +137,13 @@ export const migrateWithType = createAsyncThunk(
     }
 
     const signer = provider.getSigner();
-    const migrator = OlympusTokenMigrator__factory.connect(addresses[networkID].MIGRATOR_ADDRESS, signer);
+    const migrator = LionTokenMigrator__factory.connect(addresses[networkID].MIGRATOR_ADDRESS, signer);
 
     let migrateTx: ethers.ContractTransaction | undefined;
     try {
       migrateTx = await migrator.migrate(
-        ethers.utils.parseUnits(value, type === "wsohm" ? "ether" : "gwei"),
-        type === "wsohm" ? TokenType.WRAPPED : TokenType.STAKED,
+        ethers.utils.parseUnits(value, type === "wslion" ? "ether" : "gwei"),
+        type === "wslion" ? TokenType.WRAPPED : TokenType.STAKED,
         TokenType.WRAPPED,
       );
       const text = `Migrate ${type} Tokens`;
@@ -174,7 +174,7 @@ export const migrateAll = createAsyncThunk(
     }
 
     const signer = provider.getSigner();
-    const migrator = OlympusTokenMigrator__factory.connect(addresses[networkID].MIGRATOR_ADDRESS, signer);
+    const migrator = LionTokenMigrator__factory.connect(addresses[networkID].MIGRATOR_ADDRESS, signer);
 
     let migrateAllTx: ethers.ContractTransaction | undefined;
 
@@ -199,7 +199,7 @@ export const migrateAll = createAsyncThunk(
   },
 );
 
-export const migrateCrossChainWSOHM = createAsyncThunk(
+export const migrateCrossChainWSLION = createAsyncThunk(
   "migrate/migrateAvax",
   async ({ provider, address, networkID, type, value, action }: IMigrationWithType, { dispatch }) => {
     if (!provider) {

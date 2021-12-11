@@ -1,5 +1,5 @@
 {
-  "contractName": "PreOlympusSales",
+  "contractName": "PreLionSales",
   "abi": [
     { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
     {

@@ -69,7 +69,7 @@ function ChooseBond() {
       {!isAccountLoading && !isEmpty(accountBonds) && <ClaimBonds activeBonds={accountBonds} />}
 
       <Zoom in={true}>
-        <Paper className="ohm-card">
+        <Paper className="lion-card">
           <Box className="card-header">
             <Typography variant="h5" data-testid="t">
               <Trans>Bond</Trans> (1,1)
@@ -99,10 +99,10 @@ function ChooseBond() {
               </Box>
             </Grid>
 
-            <Grid item xs={6} className={`ohm-price`}>
+            <Grid item xs={6} className={`lion-price`}>
               <Box textAlign={`${isVerySmallScreen ? "right" : "center"}`}>
                 <Typography variant="h5" color="textSecondary">
-                  <Trans>OHM Price</Trans>
+                  <Trans>LION Price</Trans>
                 </Typography>
                 <Typography variant="h4">
                   {isAppLoading || isNaN(Number(marketPrice)) ? (
@@ -151,7 +151,7 @@ function ChooseBond() {
       </Zoom>
 
       {isSmallScreen && (
-        <Box className="ohm-card-container">
+        <Box className="lion-card-container">
           <Grid container item spacing={2}>
             {bonds.map(bond => {
               if (bond.getBondability(networkId)) {

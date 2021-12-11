@@ -27,13 +27,13 @@
     width: 100%;
   }
 
-  .ohm-card .card-header {
+  .lion-card .card-header {
     position: relative;
   }
-  .ohm-card .header {
+  .lion-card .header {
     min-height: 3em;
   }
-  .ohm-card.secondary .card-header {
+  .lion-card.secondary .card-header {
     min-height: 33px !important;
     height: 20px;
   }
@@ -88,7 +88,7 @@
   }
 }
 
-.migrate-sohm-button {
+.migrate-slion-button {
   position: absolute;
   right: 0px;
   top: 0px;
@@ -103,7 +103,7 @@
   }
 }
 
-.migrate-sohm-button.complete {
+.migrate-slion-button.complete {
   color: #35ee66 !important;
 }
 
@@ -141,7 +141,7 @@
   text-align: left;
 }
 
-.ohm-logo-tiny {
+.lion-logo-tiny {
   height: 14px;
   width: 14px;
   vertical-align: middle;
@@ -200,7 +200,7 @@
   }
 }
 
-.ohm-input {
+.lion-input {
   max-width: 542px;
   width: 100%;
   margin: 4px !important;
@@ -287,7 +287,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    .ohm-pairs p {
+    .lion-pairs p {
       margin-bottom: 0 !important;
     }
   }

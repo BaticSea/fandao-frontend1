@@ -5,10 +5,10 @@ import { abi as PairContractABI } from "../abi/PairContract.json";
 import { abi as RedeemHelperABI } from "../abi/RedeemHelper.json";
 
 import { SvgIcon } from "@material-ui/core";
-import { ReactComponent as OhmImg } from "../assets/tokens/token_OHM.svg";
-import { ReactComponent as SOhmImg } from "../assets/tokens/token_sOHM.svg";
+import { ReactComponent as LionImg } from "../assets/tokens/token_LION.svg";
+import { ReactComponent as SLionImg } from "../assets/tokens/token_sLION.svg";
 
-import { ohm_dai } from "./AllBonds";
+import { lion_dai } from "./AllBonds";
 import { JsonRpcSigner, StaticJsonRpcProvider } from "@ethersproject/providers";
 import { IBaseAsyncThunk } from "src/slices/interfaces";
 import { PairContract, RedeemHelper } from "../typechain";
@@ -16,8 +16,8 @@ import { PairContract, RedeemHelper } from "../typechain";
 import { EnvHelper } from "../helpers/Environment";
 
 export async function getMarketPrice({ networkID, provider }: IBaseAsyncThunk) {
-  const ohm_dai_address = ohm_dai.getAddressForReserve(networkID);
-  const pairContract = new ethers.Contract(ohm_dai_address || "", PairContractABI, provider) as PairContract;
+  const lion_dai_address = lion_dai.getAddressForReserve(networkID);
+  const pairContract = new ethers.Contract(lion_dai_address || "", PairContractABI, provider) as PairContract;
   const reserves = await pairContract.getReserves();
   const marketPrice = Number(reserves[1].toString()) / Number(reserves[0].toString());
 
@@ -29,7 +29,7 @@ export async function getMarketPrice({ networkID, provider }: IBaseAsyncThunk) {
  * @param tokenId STRING taken from https://www.coingecko.com/api/documentations/v3#/coins/get_coins_list
  * @returns INTEGER usd value
  */
-export async function getTokenPrice(tokenId = "olympus") {
+export async function getTokenPrice(tokenId = "lion") {
   let resp;
   try {
     resp = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${tokenId}&vs_currencies=usd`);
@@ -113,19 +113,19 @@ export function prettifySeconds(seconds: number, resolution?: string) {
   return result;
 }
 
-function getSohmTokenImage() {
-  return <SvgIcon component={SOhmImg} viewBox="0 0 100 100" style={{ height: "1rem", width: "1rem" }} />;
+function getSlionTokenImage() {
+  return <SvgIcon component={SLionImg} viewBox="0 0 100 100" style={{ height: "1rem", width: "1rem" }} />;
 }
 
-export function getOhmTokenImage(w?: number, h?: number) {
+export function getLionTokenImage(w?: number, h?: number) {
   const height = h == null ? "32px" : `${h}px`;
   const width = w == null ? "32px" : `${w}px`;
-  return <SvgIcon component={OhmImg} viewBox="0 0 32 32" style={{ height, width }} />;
+  return <SvgIcon component={LionImg} viewBox="0 0 32 32" style={{ height, width }} />;
 }
 
 export function getTokenImage(name: string) {
-  if (name === "ohm") return getOhmTokenImage();
-  if (name === "sohm") return getSohmTokenImage();
+  if (name === "lion") return getLionTokenImage();
+  if (name === "slion") return getSlionTokenImage();
 }
 
 // TS-REFACTOR-NOTE - Used for:

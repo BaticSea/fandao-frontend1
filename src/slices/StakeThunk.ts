@@ -1,7 +1,7 @@
 import { ethers, BigNumber } from "ethers";
 import { addresses } from "../constants";
 import { abi as ierc20ABI } from "../abi/IERC20.json";
-import { abi as OlympusStakingABI } from "../abi/OlympusStakingv2.json";
+import { abi as LionStakingABI } from "../abi/LionStakingv2.json";
 import { abi as StakingHelperABI } from "../abi/StakingHelper.json";
 import { clearPendingTxn, fetchPendingTxns, getStakingTypeText } from "./PendingTxnsSlice";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -9,7 +9,7 @@ import { fetchAccountSuccess, getBalances } from "./AccountSlice";
 import { error, info } from "../slices/MessagesSlice";
 import { IActionValueAsyncThunk, IChangeApprovalAsyncThunk, IJsonRPCError } from "./interfaces";
 import { segmentUA } from "../helpers/userAnalyticHelpers";
-import { IERC20, OlympusStakingv2, StakingHelper } from "src/typechain";
+import { IERC20, LionStakingv2, StakingHelper } from "src/typechain";
 import ReactGA from "react-ga";
 
 interface IUAData {
@@ -26,9 +26,9 @@ function alreadyApprovedToken(token: string, stakeAllowance: BigNumber, unstakeA
   let applicableAllowance = bigZero;
 
   // determine which allowance to check
-  if (token === "ohm") {
+  if (token === "lion") {
     applicableAllowance = stakeAllowance;
-  } else if (token === "sohm") {
+  } else if (token === "slion") {
     applicableAllowance = unstakeAllowance;
   }
 
@@ -47,11 +47,15 @@ export const changeApproval = createAsyncThunk(
     }
 
     const signer = provider.getSigner();
-    const ohmContract = new ethers.Contract(addresses[networkID].OHM_ADDRESS as string, ierc20ABI, signer) as IERC20;
-    const sohmContract = new ethers.Contract(addresses[networkID].SOHM_ADDRESS as string, ierc20ABI, signer) as IERC20;
+    const lionContract = new ethers.Contract(addresses[networkID].LION_ADDRESS as string, ierc20ABI, signer) as IERC20;
+    const slionContract = new ethers.Contract(
+      addresses[networkID].SLION_ADDRESS as string,
+      ierc20ABI,
+      signer,
+    ) as IERC20;
     let approveTx;
-    let stakeAllowance = await ohmContract.allowance(address, addresses[networkID].STAKING_HELPER_ADDRESS);
-    let unstakeAllowance = await sohmContract.allowance(address, addresses[networkID].STAKING_ADDRESS);
+    let stakeAllowance = await lionContract.allowance(address, addresses[networkID].STAKING_HELPER_ADDRESS);
+    let unstakeAllowance = await slionContract.allowance(address, addresses[networkID].STAKING_ADDRESS);
 
     // return early if approval has already happened
     if (alreadyApprovedToken(token, stakeAllowance, unstakeAllowance)) {
@@ -59,29 +63,29 @@ export const changeApproval = createAsyncThunk(
       return dispatch(
         fetchAccountSuccess({
           staking: {
-            ohmStake: +stakeAllowance,
-            ohmUnstake: +unstakeAllowance,
+            lionStake: +stakeAllowance,
+            lionUnstake: +unstakeAllowance,
           },
         }),
       );
     }
 
     try {
-      if (token === "ohm") {
+      if (token === "lion") {
         // won't run if stakeAllowance > 0
-        approveTx = await ohmContract.approve(
+        approveTx = await lionContract.approve(
           addresses[networkID].STAKING_HELPER_ADDRESS,
           ethers.utils.parseUnits("1000000000", "gwei").toString(),
         );
-      } else if (token === "sohm") {
-        approveTx = await sohmContract.approve(
+      } else if (token === "slion") {
+        approveTx = await slionContract.approve(
           addresses[networkID].STAKING_ADDRESS,
           ethers.utils.parseUnits("1000000000", "gwei").toString(),
         );
       }
 
-      const text = "Approve " + (token === "ohm" ? "Staking" : "Unstaking");
-      const pendingTxnType = token === "ohm" ? "approve_staking" : "approve_unstaking";
+      const text = "Approve " + (token === "lion" ? "Staking" : "Unstaking");
+      const pendingTxnType = token === "lion" ? "approve_staking" : "approve_unstaking";
       if (approveTx) {
         dispatch(fetchPendingTxns({ txnHash: approveTx.hash, text, type: pendingTxnType }));
 
@@ -97,14 +101,14 @@ export const changeApproval = createAsyncThunk(
     }
 
     // go get fresh allowances
-    stakeAllowance = await ohmContract.allowance(address, addresses[networkID].STAKING_HELPER_ADDRESS);
-    unstakeAllowance = await sohmContract.allowance(address, addresses[networkID].STAKING_ADDRESS);
+    stakeAllowance = await lionContract.allowance(address, addresses[networkID].STAKING_HELPER_ADDRESS);
+    unstakeAllowance = await slionContract.allowance(address, addresses[networkID].STAKING_ADDRESS);
 
     return dispatch(
       fetchAccountSuccess({
         staking: {
-          ohmStake: +stakeAllowance,
-          ohmUnstake: +unstakeAllowance,
+          lionStake: +stakeAllowance,
+          lionUnstake: +unstakeAllowance,
         },
       }),
     );
@@ -122,9 +126,9 @@ export const changeStake = createAsyncThunk(
     const signer = provider.getSigner();
     const staking = new ethers.Contract(
       addresses[networkID].STAKING_ADDRESS as string,
-      OlympusStakingABI,
+      LionStakingABI,
       signer,
-    ) as OlympusStakingv2;
+    ) as LionStakingv2;
     const stakingHelper = new ethers.Contract(
       addresses[networkID].STAKING_HELPER_ADDRESS as string,
       StakingHelperABI,
