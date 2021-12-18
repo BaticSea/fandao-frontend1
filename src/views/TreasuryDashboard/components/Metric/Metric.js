@@ -21,12 +21,12 @@ export const MarketCap = () => {
   );
 };
 
-export const OHMPrice = () => {
+export const FANPrice = () => {
   const marketPrice = useSelector(state => state.app.marketPrice);
   return (
     <Metric
       className="metric price"
-      label={t`OHM Price`}
+      label={t`FAN Price`}
       metric={marketPrice && formatCurrency(marketPrice, 2)}
       isLoading={marketPrice ? false : true}
       {...sharedProps}
@@ -49,14 +49,14 @@ export const CircSupply = () => {
   );
 };
 
-export const BackingPerOHM = () => {
-  const backingPerOhm = useSelector(state => state.app.treasuryMarketValue / state.app.circSupply);
+export const BackingPerFAN = () => {
+  const backingPerFan = useSelector(state => state.app.treasuryMarketValue / state.app.circSupply);
   return (
     <Metric
       className="metric bpo"
-      label={t`Backing per OHM`}
-      metric={!isNaN(backingPerOhm) && formatCurrency(backingPerOhm, 2)}
-      isLoading={backingPerOhm ? false : true}
+      label={t`Backing per FAN`}
+      metric={!isNaN(backingPerFan) && formatCurrency(backingPerFan, 2)}
+      isLoading={backingPerFan ? false : true}
       {...sharedProps}
     />
   );
@@ -68,24 +68,24 @@ export const CurrentIndex = () => {
     <Metric
       className="metric index"
       label={t`Current Index`}
-      metric={currentIndex && trim(currentIndex, 2) + " sOHM"}
+      metric={currentIndex && trim(currentIndex, 2) + " sFAN"}
       isLoading={currentIndex ? false : true}
       {...sharedProps}
-      tooltip="The current index tracks the amount of sOHM accumulated since the beginning of staking. Basically, how much sOHM one would have if they staked and held a single OHM from day 1."
+      tooltip="The current index tracks the amount of sFAN accumulated since the beginning of staking. Basically, how much sFAN one would have if they staked and held a single FAN from day 1."
     />
   );
 };
 
-export const WSOHMPrice = () => {
-  const wsOhmPrice = useSelector(state => state.app.marketPrice * state.app.currentIndex);
+export const WSFANPrice = () => {
+  const wsFanPrice = useSelector(state => state.app.marketPrice * state.app.currentIndex);
   return (
     <Metric
       className="metric wsoprice"
-      label={t`wsOHM Price`}
-      metric={wsOhmPrice && formatCurrency(wsOhmPrice, 2)}
-      isLoading={wsOhmPrice ? false : true}
+      label={t`wsFAN Price`}
+      metric={wsFanPrice && formatCurrency(wsFanPrice, 2)}
+      isLoading={wsFanPrice ? false : true}
       {...sharedProps}
-      tooltip={`wsOHM = sOHM * index\n\nThe price of wsOHM is equal to the price of OHM multiplied by the current index`}
+      tooltip={`wsFAN = sFAN * index\n\nThe price of wsFAN is equal to the price of FAN multiplied by the current index`}
     />
   );
 };

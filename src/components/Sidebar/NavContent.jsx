@@ -128,7 +128,7 @@ function NavContent() {
                   </Link>
 
                   <Link
-                    href={"https://synapseprotocol.com/?inputCurrency=gOHM&outputCurrency=gOHM&outputChain=43114"}
+                    href={"https://synapseprotocol.com/?inputCurrency=gFAN&outputCurrency=gFAN&outputChain=43114"}
                     target="_blank"
                   >
                     <Typography variant="h6">
@@ -238,7 +238,7 @@ function NavContent() {
                   </Link>
 
                   <Link
-                    href={"https://synapseprotocol.com/?inputCurrency=gOHM&outputCurrency=gOHM&outputChain=43114"}
+                    href={"https://synapseprotocol.com/?inputCurrency=gFAN&outputCurrency=gFAN&outputChain=43114"}
                     target="_blank"
                   >
                     <Typography variant="h6">
